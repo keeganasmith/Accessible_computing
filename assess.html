@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Run a structured, accessible skin concern self-check and determine whether your symptoms may need urgent care."
+    />
+    <title>DermAssist Audio | Guided Skin Assessment</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header" role="banner">
+      <div class="wrap">
+        <h1>Guided Skin Assessment</h1>
+        <p class="tagline">A step-by-step, voice-friendly checklist to assess skin concerns before you seek care.</p>
+        <nav aria-label="Main navigation">
+          <ul class="nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#urgent-check">Urgent check</a></li>
+            <li><a href="#assessment-form">Assessment form</a></li>
+            <li><a href="resources.html">Resources</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" class="wrap" tabindex="-1">
+      <section class="hero" aria-labelledby="assessment-title">
+        <h2 id="assessment-title">Start by checking for emergency symptoms</h2>
+        <p>
+          This tool helps you organize symptoms and decide how quickly to contact care. It cannot diagnose conditions,
+          and it does not replace a clinician.
+        </p>
+      </section>
+
+      <section id="urgent-check" aria-labelledby="urgent-check-title">
+        <h2 id="urgent-check-title">Step 1: Urgent symptom screen</h2>
+        <p>If you answer <strong>Yes</strong> to any question below, seek emergency or urgent care now.</p>
+
+        <ul class="assessment-list" aria-label="Urgent symptom checklist">
+          <li><label><input type="checkbox" /> Trouble breathing, throat tightness, or severe facial swelling.</label></li>
+          <li><label><input type="checkbox" /> Fever with spreading redness, pus, or red streaks on skin.</label></li>
+          <li><label><input type="checkbox" /> Severe pain, rapidly worsening swelling, or skin turning dark/black.</label></li>
+          <li><label><input type="checkbox" /> Deep burn, large blistering area, or a wound that will not stop bleeding.</label></li>
+        </ul>
+
+        <div class="status-card status-urgent" role="status" aria-live="polite">
+          <h3>Urgent action</h3>
+          <p>
+            If any box is checked, call emergency services or go to urgent care immediately. Bring notes or photos if
+            safely available.
+          </p>
+        </div>
+      </section>
+
+      <section id="assessment-form" aria-labelledby="assessment-form-title">
+        <h2 id="assessment-form-title">Step 2: Structured skin assessment</h2>
+        <p>Complete each section to prepare a clear report for your clinician.</p>
+
+        <form class="assessment-form" aria-describedby="form-note">
+          <fieldset>
+            <legend>Where is the skin concern located?</legend>
+            <label><input type="radio" name="area" /> Face or scalp</label>
+            <label><input type="radio" name="area" /> Arm or hand</label>
+            <label><input type="radio" name="area" /> Leg or foot</label>
+            <label><input type="radio" name="area" /> Torso or back</label>
+            <label><input type="radio" name="area" /> Genital or sensitive area</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Which changes do you notice?</legend>
+            <label><input type="checkbox" /> New spot or rash</label>
+            <label><input type="checkbox" /> Growth in size or raised texture</label>
+            <label><input type="checkbox" /> Color changes (darker, redder, patchy, or uneven)</label>
+            <label><input type="checkbox" /> Bleeding, crusting, or oozing</label>
+            <label><input type="checkbox" /> Itching, tenderness, burning, or pain</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>How long has this been present?</legend>
+            <label><input type="radio" name="timeline" /> Less than 24 hours</label>
+            <label><input type="radio" name="timeline" /> 1 to 7 days</label>
+            <label><input type="radio" name="timeline" /> 1 to 4 weeks</label>
+            <label><input type="radio" name="timeline" /> More than 1 month</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Recent risk factors</legend>
+            <label><input type="checkbox" /> New medication, soap, detergent, or skin product</label>
+            <label><input type="checkbox" /> Recent outdoor exposure, insect bite, or poison ivy/oak contact</label>
+            <label><input type="checkbox" /> Existing diabetes, reduced circulation, or weak immune system</label>
+            <label><input type="checkbox" /> Family or personal history of skin cancer</label>
+          </fieldset>
+
+          <p id="form-note">
+            Tip for screen reader users: navigate by heading or form fieldset to move quickly between sections.
+          </p>
+        </form>
+      </section>
+
+      <section aria-labelledby="next-steps-title">
+        <h2 id="next-steps-title">Step 3: Decide next steps</h2>
+        <div class="status-grid">
+          <article class="status-card status-watch">
+            <h3>Monitor at home (low concern)</h3>
+            <p>Mild symptoms and no warning signs. Re-check in 24 to 48 hours and keep notes.</p>
+          </article>
+          <article class="status-card status-soon">
+            <h3>Book a visit soon (moderate concern)</h3>
+            <p>Persistent or worsening symptoms. Schedule primary care or dermatology within a few days.</p>
+          </article>
+          <article class="status-card status-urgent">
+            <h3>Seek urgent care now (high concern)</h3>
+            <p>Any emergency sign or rapid deterioration. Do not wait for routine appointments.</p>
+          </article>
+        </div>
+      </section>
+
+      <p><a class="button" href="resources.html">Open skin check resources</a></p>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+      <div class="wrap">
+        <p>
+          DermAssist Audio provides educational support only. For diagnosis and treatment, contact a licensed
+          healthcare professional.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
