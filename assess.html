@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Run a structured, accessible skin concern self-check and determine whether your symptoms may need urgent care."
+      content="Capture a skin photo with accessible guidance and receive an AI-supported triage summary to help decide next care steps."
     />
-    <title>DermAssist Audio | Guided Skin Assessment</title>
+    <title>DermAssist Audio | Skin Photo Assessment</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -15,13 +15,14 @@
 
     <header class="site-header" role="banner">
       <div class="wrap">
-        <h1>Guided Skin Assessment</h1>
-        <p class="tagline">A step-by-step, voice-friendly checklist to assess skin concerns before you seek care.</p>
+        <h1>Skin Photo Assessment</h1>
+        <p class="tagline">Take guided photos of your skin concern and review AI-supported triage results.</p>
         <nav aria-label="Main navigation">
           <ul class="nav-list">
             <li><a href="index.html">Home</a></li>
-            <li><a href="#urgent-check">Urgent check</a></li>
-            <li><a href="#assessment-form">Assessment form</a></li>
+            <li><a href="#photo-capture">Photo capture</a></li>
+            <li><a href="#analysis-details">AI analysis details</a></li>
+            <li><a href="#next-steps">Next steps</a></li>
             <li><a href="resources.html">Resources</a></li>
           </ul>
         </nav>
@@ -30,16 +31,16 @@
 
     <main id="main-content" class="wrap" tabindex="-1">
       <section class="hero" aria-labelledby="assessment-title">
-        <h2 id="assessment-title">Start by checking for emergency symptoms</h2>
+        <h2 id="assessment-title">Step 1: Check emergency symptoms before taking photos</h2>
         <p>
-          This tool helps you organize symptoms and decide how quickly to contact care. It cannot diagnose conditions,
-          and it does not replace a clinician.
+          If you have severe symptoms, seek urgent care first. If not, continue with guided image capture so the AI can
+          evaluate visible skin patterns.
         </p>
       </section>
 
       <section id="urgent-check" aria-labelledby="urgent-check-title">
-        <h2 id="urgent-check-title">Step 1: Urgent symptom screen</h2>
-        <p>If you answer <strong>Yes</strong> to any question below, seek emergency or urgent care now.</p>
+        <h2 id="urgent-check-title">Urgent symptom screen</h2>
+        <p>If you answer <strong>Yes</strong> to any item, seek emergency or urgent care now.</p>
 
         <ul class="assessment-list" aria-label="Urgent symptom checklist">
           <li><label><input type="checkbox" /> Trouble breathing, throat tightness, or severe facial swelling.</label></li>
@@ -51,82 +52,98 @@
         <div class="status-card status-urgent" role="status" aria-live="polite">
           <h3>Urgent action</h3>
           <p>
-            If any box is checked, call emergency services or go to urgent care immediately. Bring notes or photos if
-            safely available.
+            If any box is checked, call emergency services or go to urgent care immediately. Do not delay for photo
+            analysis.
           </p>
         </div>
       </section>
 
-      <section id="assessment-form" aria-labelledby="assessment-form-title">
-        <h2 id="assessment-form-title">Step 2: Structured skin assessment</h2>
-        <p>Complete each section to prepare a clear report for your clinician.</p>
-
-        <form class="assessment-form" aria-describedby="form-note">
+      <section id="photo-capture" aria-labelledby="capture-title">
+        <h2 id="capture-title">Step 2: Capture skin photos</h2>
+        <form class="assessment-form" aria-describedby="capture-note">
           <fieldset>
-            <legend>Where is the skin concern located?</legend>
-            <label><input type="radio" name="area" /> Face or scalp</label>
-            <label><input type="radio" name="area" /> Arm or hand</label>
-            <label><input type="radio" name="area" /> Leg or foot</label>
-            <label><input type="radio" name="area" /> Torso or back</label>
-            <label><input type="radio" name="area" /> Genital or sensitive area</label>
+            <legend>Photo setup</legend>
+            <label><input type="checkbox" /> Good lighting is available (natural light or bright room light)</label>
+            <label><input type="checkbox" /> Camera lens is clean</label>
+            <label><input type="checkbox" /> Skin area is clearly visible</label>
+            <label><input type="checkbox" /> A reference object is available for size comparison (coin/ruler)</label>
           </fieldset>
 
           <fieldset>
-            <legend>Which changes do you notice?</legend>
-            <label><input type="checkbox" /> New spot or rash</label>
-            <label><input type="checkbox" /> Growth in size or raised texture</label>
-            <label><input type="checkbox" /> Color changes (darker, redder, patchy, or uneven)</label>
-            <label><input type="checkbox" /> Bleeding, crusting, or oozing</label>
-            <label><input type="checkbox" /> Itching, tenderness, burning, or pain</label>
+            <legend>Images to capture</legend>
+            <label><input type="checkbox" /> Close-up image of the main spot/rash/wound</label>
+            <label><input type="checkbox" /> Mid-range image showing nearby skin</label>
+            <label><input type="checkbox" /> Wider image showing body location context</label>
+            <label><input type="checkbox" /> Optional second-angle image for texture or raised edges</label>
           </fieldset>
 
           <fieldset>
-            <legend>How long has this been present?</legend>
-            <label><input type="radio" name="timeline" /> Less than 24 hours</label>
-            <label><input type="radio" name="timeline" /> 1 to 7 days</label>
-            <label><input type="radio" name="timeline" /> 1 to 4 weeks</label>
-            <label><input type="radio" name="timeline" /> More than 1 month</label>
+            <legend>Voice guidance options</legend>
+            <label><input type="radio" name="voice-mode" /> Audio prompts on (recommended)</label>
+            <label><input type="radio" name="voice-mode" /> Audio prompts off</label>
           </fieldset>
 
-          <fieldset>
-            <legend>Recent risk factors</legend>
-            <label><input type="checkbox" /> New medication, soap, detergent, or skin product</label>
-            <label><input type="checkbox" /> Recent outdoor exposure, insect bite, or poison ivy/oak contact</label>
-            <label><input type="checkbox" /> Existing diabetes, reduced circulation, or weak immune system</label>
-            <label><input type="checkbox" /> Family or personal history of skin cancer</label>
-          </fieldset>
+          <p id="capture-note">
+            The live camera and upload actions are represented here as a demo flow. In production, users would capture
+            photos directly in-app and submit them for AI review.
+          </p>
 
-          <p id="form-note">
-            Tip for screen reader users: navigate by heading or form fieldset to move quickly between sections.
+          <p>
+            <a class="button" href="#analysis-details">Submit photos for AI analysis</a>
           </p>
         </form>
       </section>
 
-      <section aria-labelledby="next-steps-title">
-        <h2 id="next-steps-title">Step 3: Decide next steps</h2>
+      <section id="analysis-details" aria-labelledby="analysis-title">
+        <h2 id="analysis-title">Step 3: AI analysis summary (demo)</h2>
+        <p>The model reviews each photo for visible concern signals and generates a triage-oriented output.</p>
+
         <div class="status-grid">
           <article class="status-card status-watch">
-            <h3>Monitor at home (low concern)</h3>
-            <p>Mild symptoms and no warning signs. Re-check in 24 to 48 hours and keep notes.</p>
+            <h3>Low concern pattern</h3>
+            <p>Features appear mild and stable. Monitor for 24 to 48 hours and recheck if changes occur.</p>
           </article>
           <article class="status-card status-soon">
-            <h3>Book a visit soon (moderate concern)</h3>
-            <p>Persistent or worsening symptoms. Schedule primary care or dermatology within a few days.</p>
+            <h3>Moderate concern pattern</h3>
+            <p>Persistent inflammation or suspicious visual changes. Book primary care or dermatology soon.</p>
           </article>
           <article class="status-card status-urgent">
-            <h3>Seek urgent care now (high concern)</h3>
-            <p>Any emergency sign or rapid deterioration. Do not wait for routine appointments.</p>
+            <h3>High concern pattern</h3>
+            <p>Possible infection, rapid deterioration, or dangerous skin changes. Seek urgent in-person care now.</p>
           </article>
         </div>
+
+        <form class="assessment-form" aria-describedby="analysis-note">
+          <fieldset>
+            <legend>Optional context to improve triage quality</legend>
+            <label><input type="checkbox" /> Pain, itching, or burning is worsening</label>
+            <label><input type="checkbox" /> Spot has changed size, color, or border recently</label>
+            <label><input type="checkbox" /> You have fever or other whole-body symptoms</label>
+            <label><input type="checkbox" /> You have diabetes, poor circulation, or reduced immunity</label>
+          </fieldset>
+          <p id="analysis-note">
+            Combining image analysis with symptom details helps prioritize follow-up urgency, but diagnosis still
+            requires a clinician.
+          </p>
+        </form>
       </section>
 
-      <p><a class="button" href="resources.html">Open skin check resources</a></p>
+      <section id="next-steps" aria-labelledby="next-steps-title">
+        <h2 id="next-steps-title">Step 4: Act on the result</h2>
+        <ul>
+          <li><strong>Monitor:</strong> Retake photos on a regular schedule to track change over time.</li>
+          <li><strong>Book soon:</strong> Share results and photos with primary care or dermatology.</li>
+          <li><strong>Urgent:</strong> Go to urgent care or emergency services immediately.</li>
+        </ul>
+
+        <p><a class="button" href="resources.html">Open skin check resources</a></p>
+      </section>
     </main>
 
     <footer class="site-footer" role="contentinfo">
       <div class="wrap">
         <p>
-          DermAssist Audio provides educational support only. For diagnosis and treatment, contact a licensed
+          DermAssist Audio provides educational triage support only. For diagnosis and treatment, contact a licensed
           healthcare professional.
         </p>
       </div>
