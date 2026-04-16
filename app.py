@@ -1,8 +1,10 @@
 import os
 import re
+import traceback
 from functools import lru_cache
 
 from flask import Flask, jsonify, request
+from werkzeug.exceptions import HTTPException
 from PIL import Image, UnidentifiedImageError
 from transformers import pipeline
 
@@ -46,13 +48,20 @@ def parse_severity(label: str) -> int:
 app = Flask(__name__)
 
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    return response
+
+
 @app.get("/health")
 def health_check():
     return jsonify({"status": "ok", "model": MODEL_ID})
 
 
-@app.post("/predict")
-def predict():
+def _run_prediction():
     if "image" not in request.files:
         return jsonify({"error": "Missing image file. Use multipart/form-data with field name 'image'."}), 400
 
@@ -72,7 +81,16 @@ def predict():
         raw_label = str(top_prediction["label"])
         severity_score = parse_severity(raw_label)
     except Exception as exc:
-        return jsonify({"error": "Model inference failed.", "details": str(exc)}), 500
+        return (
+            jsonify(
+                {
+                    "error": "Model inference failed.",
+                    "details": str(exc),
+                    "stack_trace": traceback.format_exc(),
+                }
+            ),
+            500,
+        )
 
     return jsonify(
         {
@@ -82,6 +100,36 @@ def predict():
             "confidence": top_prediction.get("score"),
             "score_range": {"min": -1, "max": 4},
         }
+    )
+
+
+@app.route("/severity", methods=["POST", "OPTIONS"])
+def severity():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    return _run_prediction()
+
+
+@app.route("/predict", methods=["POST", "OPTIONS"])
+def predict():
+    if request.method == "OPTIONS":
+        return ("", 204)
+    return _run_prediction()
+
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(exc):
+    if isinstance(exc, HTTPException):
+        return exc
+    return (
+        jsonify(
+            {
+                "error": "Unexpected server error.",
+                "details": str(exc),
+                "stack_trace": traceback.format_exc(),
+            }
+        ),
+        500,
     )
 
 

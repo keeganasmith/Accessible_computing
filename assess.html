@@ -77,16 +77,19 @@
             <label><input type="checkbox" /> Optional second-angle image for texture or raised edges</label>
           </fieldset>
 
-          <fieldset aria-describedby="upload-help upload-status">
+          <fieldset aria-describedby="upload-help upload-status severity-result">
             <legend>Upload image files</legend>
             <label for="skin-images">Choose one or more photos to attach</label>
             <input id="skin-images" name="skin-images" type="file" accept="image/*" multiple />
-            <p id="upload-help">Accepted formats: JPG, PNG, HEIC. Uploading is shown as a mockup in this prototype.</p>
+            <p id="upload-help">Accepted formats: JPG, PNG, HEIC.</p>
             <div id="upload-status" class="upload-preview" role="status" aria-live="polite">
-              <p><strong>Mock upload queue:</strong></p>
+              <p><strong>Upload queue:</strong></p>
               <ul id="upload-queue">
                 <li>No files selected yet.</li>
               </ul>
+            </div>
+            <div id="severity-result" class="severity-result" role="status" aria-live="polite">
+              <p>Select an image and submit to receive an AI severity summary.</p>
             </div>
           </fieldset>
 
@@ -96,13 +99,10 @@
             <label><input type="radio" name="voice-mode" /> Audio prompts off</label>
           </fieldset>
 
-          <p id="capture-note">
-            The live camera and upload actions are represented here as a demo flow. In production, users would capture
-            photos directly in-app and submit them for AI review.
-          </p>
+          <p id="capture-note">Submit a photo to the backend severity endpoint for analysis.</p>
 
           <p>
-            <a class="button" href="#analysis-details">Submit photos for AI analysis</a>
+            <button id="submit-severity" class="button" type="button">Submit first photo for AI severity analysis</button>
           </p>
         </form>
       </section>
@@ -163,8 +163,11 @@
     </footer>
 
     <script>
+      const BASE_URL = "http://localhost:5001";
       const imageInput = document.getElementById("skin-images");
       const uploadQueue = document.getElementById("upload-queue");
+      const submitSeverityButton = document.getElementById("submit-severity");
+      const severityResult = document.getElementById("severity-result");
 
       function formatSize(bytes) {
         if (bytes < 1024) {
@@ -191,9 +194,83 @@
         }
       }
 
+      function confidenceToPercent(confidence) {
+        if (typeof confidence !== "number" || Number.isNaN(confidence)) {
+          return "Not provided";
+        }
+        return (confidence * 100).toFixed(1) + "%";
+      }
+
+      function severityCardClass(score) {
+        if (score >= 3) {
+          return "severity-card severity-card-urgent";
+        }
+        if (score >= 1) {
+          return "severity-card severity-card-soon";
+        }
+        return "severity-card severity-card-watch";
+      }
+
+      function renderSeveritySuccess(data, fileName) {
+        severityResult.innerHTML = `
+          <article class="${severityCardClass(data.severity_score)}">
+            <h3>Analysis complete for ${fileName}</h3>
+            <p><strong>Severity:</strong> ${data.severity_label} (score ${data.severity_score})</p>
+            <p><strong>Model confidence:</strong> ${confidenceToPercent(data.confidence)}</p>
+            <p><strong>Model class:</strong> ${data.raw_model_label}</p>
+            <p class="severity-help">This is triage guidance only. If symptoms are worsening, seek medical care promptly.</p>
+          </article>
+        `;
+      }
+
+      function renderSeverityError(message, details) {
+        severityResult.innerHTML = `
+          <article class="severity-card severity-card-error">
+            <h3>Could not analyze image</h3>
+            <p>${message}</p>
+            ${details ? `<pre class="error-details">${details}</pre>` : ""}
+          </article>
+        `;
+      }
+
+      async function submitForSeverity() {
+        const files = imageInput.files;
+        if (!files || !files.length) {
+          renderSeverityError("Please choose at least one image before submitting.");
+          return;
+        }
+
+        const file = files[0];
+        const formData = new FormData();
+        formData.append("image", file);
+        severityResult.innerHTML = `<p>Analyzing ${file.name}…</p>`;
+
+        try {
+          const response = await fetch(`${BASE_URL}/severity`, {
+            method: "POST",
+            body: formData,
+          });
+          const payload = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            const details = payload.details || payload.stack_trace || "";
+            const requestError = new Error(payload.error || `Request failed with status ${response.status}.`);
+            requestError.details = details;
+            throw requestError;
+          }
+
+          renderSeveritySuccess(payload, file.name);
+        } catch (error) {
+          const details = error.details ? String(error.details) : "";
+          renderSeverityError(error.message || "An unexpected error occurred.", details);
+        }
+      }
+
       imageInput.addEventListener("change", function (event) {
         renderUploadQueue(event.target.files);
       });
+
+      submitSeverityButton.addEventListener("click", submitForSeverity);
     </script>
   </body>
 </html>
