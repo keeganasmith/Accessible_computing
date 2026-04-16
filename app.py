@@ -3,7 +3,7 @@ import re
 import traceback
 from functools import lru_cache
 
-from flask import Flask, jsonify, request
+from flask import Flask, abort, jsonify, request, send_from_directory
 from werkzeug.exceptions import HTTPException
 from PIL import Image, UnidentifiedImageError
 from transformers import pipeline
@@ -46,6 +46,8 @@ def parse_severity(label: str) -> int:
 
 
 app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_FILES = {"index.html", "assess.html", "resources.html", "styles.css"}
 
 
 @app.after_request
@@ -59,6 +61,18 @@ def add_cors_headers(response):
 @app.get("/health")
 def health_check():
     return jsonify({"status": "ok", "model": MODEL_ID})
+
+
+@app.get("/")
+def serve_homepage():
+    return send_from_directory(BASE_DIR, "index.html")
+
+
+@app.get("/<path:filename>")
+def serve_frontend_asset(filename):
+    if filename not in FRONTEND_FILES:
+        abort(404)
+    return send_from_directory(BASE_DIR, filename)
 
 
 def _run_prediction():
