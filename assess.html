@@ -84,7 +84,7 @@
             <p id="upload-help">Accepted formats: JPG, PNG, HEIC. Uploading is shown as a mockup in this prototype.</p>
             <div id="upload-status" class="upload-preview" role="status" aria-live="polite">
               <p><strong>Mock upload queue:</strong></p>
-              <ul>
+              <ul id="upload-queue">
                 <li>No files selected yet.</li>
               </ul>
             </div>
@@ -161,5 +161,39 @@
         </p>
       </div>
     </footer>
+
+    <script>
+      const imageInput = document.getElementById("skin-images");
+      const uploadQueue = document.getElementById("upload-queue");
+
+      function formatSize(bytes) {
+        if (bytes < 1024) {
+          return bytes + " B";
+        }
+        if (bytes < 1024 * 1024) {
+          return (bytes / 1024).toFixed(1) + " KB";
+        }
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+      }
+
+      function renderUploadQueue(files) {
+        uploadQueue.innerHTML = "";
+
+        if (!files.length) {
+          uploadQueue.innerHTML = "<li>No files selected yet.</li>";
+          return;
+        }
+
+        for (const file of files) {
+          const listItem = document.createElement("li");
+          listItem.textContent = file.name + " (" + formatSize(file.size) + ")";
+          uploadQueue.appendChild(listItem);
+        }
+      }
+
+      imageInput.addEventListener("change", function (event) {
+        renderUploadQueue(event.target.files);
+      });
+    </script>
   </body>
 </html>
