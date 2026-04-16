@@ -77,6 +77,19 @@
             <label><input type="checkbox" /> Optional second-angle image for texture or raised edges</label>
           </fieldset>
 
+          <fieldset aria-describedby="upload-help upload-status">
+            <legend>Upload image files</legend>
+            <label for="skin-images">Choose one or more photos to attach</label>
+            <input id="skin-images" name="skin-images" type="file" accept="image/*" multiple />
+            <p id="upload-help">Accepted formats: JPG, PNG, HEIC. Uploading is shown as a mockup in this prototype.</p>
+            <div id="upload-status" class="upload-preview" role="status" aria-live="polite">
+              <p><strong>Mock upload queue:</strong></p>
+              <ul>
+                <li>No files selected yet.</li>
+              </ul>
+            </div>
+          </fieldset>
+
           <fieldset>
             <legend>Voice guidance options</legend>
             <label><input type="radio" name="voice-mode" /> Audio prompts on (recommended)</label>

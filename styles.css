@@ -165,6 +165,29 @@ main {
   display: block;
 }
 
+.assessment-form input[type="file"] {
+  margin-top: 0.4rem;
+  max-width: 100%;
+}
+
+.upload-preview {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.35rem;
+}
+
+.upload-preview p,
+.upload-preview ul {
+  margin: 0;
+}
+
+.upload-preview ul {
+  padding-left: 1.3rem;
+  margin-top: 0.35rem;
+}
+
 .status-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
