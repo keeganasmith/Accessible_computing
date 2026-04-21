@@ -80,8 +80,8 @@
 
           <fieldset aria-describedby="upload-help upload-status severity-result">
             <legend>Upload image files</legend>
-            <label for="skin-images">Choose one or more photos to attach</label>
-            <input id="skin-images" name="skin-images" type="file" accept="image/*" multiple />
+            <label for="skin-images">Choose one photo to attach</label>
+            <input id="skin-images" name="skin-images" type="file" accept="image/*" />
             <p id="upload-help">Accepted formats: JPG, PNG, HEIC.</p>
             <div class="camera-controls" aria-labelledby="camera-title">
               <h3 id="camera-title">Or capture a photo from your camera</h3>
@@ -103,7 +103,7 @@
             <div id="upload-status" class="upload-preview" role="status" aria-live="polite">
               <p><strong>Upload queue:</strong></p>
               <ul id="upload-queue">
-                <li>No files selected yet.</li>
+                <li>No image selected yet.</li>
               </ul>
             </div>
             <div id="severity-result" class="severity-result" role="status" aria-live="polite">
@@ -120,7 +120,7 @@
           <p id="capture-note">Submit a photo to the backend severity endpoint for analysis.</p>
 
           <p>
-            <button id="submit-severity" class="button" type="button">Submit first photo for AI severity analysis</button>
+            <button id="submit-severity" class="button" type="button">Submit selected photo for AI severity analysis</button>
           </p>
         </form>
       </section>
@@ -207,15 +207,14 @@
         uploadQueue.innerHTML = "";
 
         if (!files.length) {
-          uploadQueue.innerHTML = "<li>No files selected yet.</li>";
+          uploadQueue.innerHTML = "<li>No image selected yet.</li>";
           return;
         }
 
-        for (const file of files) {
-          const listItem = document.createElement("li");
-          listItem.textContent = file.name + " (" + formatSize(file.size) + ")";
-          uploadQueue.appendChild(listItem);
-        }
+        const file = files[0];
+        const listItem = document.createElement("li");
+        listItem.textContent = file.name + " (" + formatSize(file.size) + ")";
+        uploadQueue.appendChild(listItem);
       }
 
       function getFileExtension(fileName) {
@@ -255,16 +254,16 @@
       }
 
       async function setSelectedFiles(fileList) {
-        const inputFiles = Array.from(fileList || []);
-        if (!inputFiles.length) {
+        const inputFile = fileList && fileList[0];
+        if (!inputFile) {
           selectedFiles = [];
           renderUploadQueue(selectedFiles);
           return;
         }
 
         try {
-          const normalizedFiles = await Promise.all(inputFiles.map((file) => convertHeicToJpegIfNeeded(file)));
-          selectedFiles = normalizedFiles;
+          const normalizedFile = await convertHeicToJpegIfNeeded(inputFile);
+          selectedFiles = [normalizedFile];
           renderUploadQueue(selectedFiles);
         } catch (error) {
           selectedFiles = [];
@@ -326,7 +325,7 @@
             const capturedFile = new File([blob], `camera-capture-${timestamp}.jpg`, {
               type: "image/jpeg",
             });
-            selectedFiles = [capturedFile, ...selectedFiles];
+            selectedFiles = [capturedFile];
             renderUploadQueue(selectedFiles);
             severityResult.innerHTML = "<p>Photo captured. Submit to run AI severity analysis.</p>";
           },
