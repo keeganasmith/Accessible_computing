@@ -9,6 +9,7 @@
     />
     <title>DermAssist Audio | Skin Photo Assessment</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/heic2any/dist/heic2any.min.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -79,13 +80,30 @@
 
           <fieldset aria-describedby="upload-help upload-status severity-result">
             <legend>Upload image files</legend>
-            <label for="skin-images">Choose one or more photos to attach</label>
-            <input id="skin-images" name="skin-images" type="file" accept="image/*" multiple />
-            <p id="upload-help">Accepted formats: JPG, PNG, webp.</p>
+            <label for="skin-images">Choose one photo to attach</label>
+            <input id="skin-images" name="skin-images" type="file" accept="image/*" />
+            <p id="upload-help">Accepted formats: JPG, PNG, HEIC.</p>
+            <div class="camera-controls" aria-labelledby="camera-title">
+              <h3 id="camera-title">Or capture a photo from your camera</h3>
+              <p class="camera-help">Use this option to take a live image of yourself from the page.</p>
+              <div class="camera-buttons">
+                <button id="start-camera" class="button button-secondary" type="button">Start camera</button>
+                <button id="capture-photo" class="button" type="button" disabled>Capture photo</button>
+                <button id="stop-camera" class="button button-secondary" type="button" disabled>Stop camera</button>
+              </div>
+              <video
+                id="camera-preview"
+                class="camera-preview"
+                autoplay
+                playsinline
+                muted
+                aria-label="Live camera preview"
+              ></video>
+            </div>
             <div id="upload-status" class="upload-preview" role="status" aria-live="polite">
               <p><strong>Upload queue:</strong></p>
               <ul id="upload-queue">
-                <li>No files selected yet.</li>
+                <li>No image selected yet.</li>
               </ul>
             </div>
             <div id="severity-result" class="severity-result" role="status" aria-live="polite">
@@ -102,7 +120,7 @@
           <p id="capture-note">Submit a photo to the backend severity endpoint for analysis.</p>
 
           <p>
-            <button id="submit-severity" class="button" type="button">Submit first photo for AI severity analysis</button>
+            <button id="submit-severity" class="button" type="button">Submit selected photo for AI severity analysis</button>
           </p>
         </form>
       </section>
@@ -168,6 +186,12 @@
       const uploadQueue = document.getElementById("upload-queue");
       const submitSeverityButton = document.getElementById("submit-severity");
       const severityResult = document.getElementById("severity-result");
+      const startCameraButton = document.getElementById("start-camera");
+      const capturePhotoButton = document.getElementById("capture-photo");
+      const stopCameraButton = document.getElementById("stop-camera");
+      const cameraPreview = document.getElementById("camera-preview");
+      let cameraStream = null;
+      let selectedFiles = [];
 
       function formatSize(bytes) {
         if (bytes < 1024) {
@@ -183,15 +207,131 @@
         uploadQueue.innerHTML = "";
 
         if (!files.length) {
-          uploadQueue.innerHTML = "<li>No files selected yet.</li>";
+          uploadQueue.innerHTML = "<li>No image selected yet.</li>";
           return;
         }
 
-        for (const file of files) {
-          const listItem = document.createElement("li");
-          listItem.textContent = file.name + " (" + formatSize(file.size) + ")";
-          uploadQueue.appendChild(listItem);
+        const file = files[0];
+        const listItem = document.createElement("li");
+        listItem.textContent = file.name + " (" + formatSize(file.size) + ")";
+        uploadQueue.appendChild(listItem);
+      }
+
+      function getFileExtension(fileName) {
+        const parts = fileName.split(".");
+        return parts.length > 1 ? parts.pop().toLowerCase() : "";
+      }
+
+      function createSafeBaseName(fileName) {
+        const dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex <= 0) {
+          return fileName;
         }
+        return fileName.slice(0, dotIndex);
+      }
+
+      async function convertHeicToJpegIfNeeded(file) {
+        const isHeicType = file.type === "image/heic" || file.type === "image/heif";
+        const isHeicExtension = ["heic", "heif"].includes(getFileExtension(file.name));
+        if (!isHeicType && !isHeicExtension) {
+          return file;
+        }
+
+        if (typeof heic2any !== "function") {
+          throw new Error("HEIC conversion is unavailable right now. Please upload JPG or PNG.");
+        }
+
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: "image/jpeg",
+          quality: 0.9,
+        });
+
+        const jpegBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+        return new File([jpegBlob], `${createSafeBaseName(file.name)}.jpg`, {
+          type: "image/jpeg",
+        });
+      }
+
+      async function setSelectedFiles(fileList) {
+        const inputFile = fileList && fileList[0];
+        if (!inputFile) {
+          selectedFiles = [];
+          renderUploadQueue(selectedFiles);
+          return;
+        }
+
+        try {
+          const normalizedFile = await convertHeicToJpegIfNeeded(inputFile);
+          selectedFiles = [normalizedFile];
+          renderUploadQueue(selectedFiles);
+        } catch (error) {
+          selectedFiles = [];
+          renderUploadQueue(selectedFiles);
+          renderSeverityError(error.message || "Could not process selected files.");
+        }
+      }
+
+      async function startCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          renderSeverityError("Camera capture is not supported in this browser.");
+          return;
+        }
+
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" },
+            audio: false,
+          });
+          cameraPreview.srcObject = cameraStream;
+          capturePhotoButton.disabled = false;
+          stopCameraButton.disabled = false;
+          startCameraButton.disabled = true;
+        } catch (error) {
+          renderSeverityError("Unable to access camera. Check permission settings and try again.");
+        }
+      }
+
+      function stopCamera() {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach((track) => track.stop());
+          cameraStream = null;
+        }
+        cameraPreview.srcObject = null;
+        capturePhotoButton.disabled = true;
+        stopCameraButton.disabled = true;
+        startCameraButton.disabled = false;
+      }
+
+      function captureFromCamera() {
+        if (!cameraStream || !cameraPreview.videoWidth || !cameraPreview.videoHeight) {
+          renderSeverityError("Camera preview is not ready yet. Start the camera and try again.");
+          return;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = cameraPreview.videoWidth;
+        canvas.height = cameraPreview.videoHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              renderSeverityError("Unable to capture photo. Please try again.");
+              return;
+            }
+            const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+            const capturedFile = new File([blob], `camera-capture-${timestamp}.jpg`, {
+              type: "image/jpeg",
+            });
+            selectedFiles = [capturedFile];
+            renderUploadQueue(selectedFiles);
+            severityResult.innerHTML = "<p>Photo captured. Submit to run AI severity analysis.</p>";
+          },
+          "image/jpeg",
+          0.9
+        );
       }
 
       function confidenceToPercent(confidence) {
@@ -234,13 +374,12 @@
       }
 
       async function submitForSeverity() {
-        const files = imageInput.files;
-        if (!files || !files.length) {
+        if (!selectedFiles.length) {
           renderSeverityError("Please choose at least one image before submitting.");
           return;
         }
 
-        const file = files[0];
+        const file = selectedFiles[0];
         const formData = new FormData();
         formData.append("image", file);
         severityResult.innerHTML = `<p>Analyzing ${file.name}…</p>`;
@@ -267,10 +406,14 @@
       }
 
       imageInput.addEventListener("change", function (event) {
-        renderUploadQueue(event.target.files);
+        setSelectedFiles(event.target.files);
       });
 
       submitSeverityButton.addEventListener("click", submitForSeverity);
+      startCameraButton.addEventListener("click", startCamera);
+      capturePhotoButton.addEventListener("click", captureFromCamera);
+      stopCameraButton.addEventListener("click", stopCamera);
+      window.addEventListener("beforeunload", stopCamera);
     </script>
   </body>
 </html>
