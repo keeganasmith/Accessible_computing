@@ -191,6 +191,38 @@ main {
   margin-top: 0.35rem;
 }
 
+.camera-controls {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.35rem;
+  background: #ffffff;
+}
+
+.camera-controls h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.camera-help {
+  margin: 0.4rem 0 0.7rem;
+}
+
+.camera-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.camera-preview {
+  width: 100%;
+  max-width: 26rem;
+  margin-top: 0.75rem;
+  border-radius: 0.35rem;
+  border: 1px solid #d1d5db;
+  background: #111827;
+}
+
 .status-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
@@ -255,9 +287,11 @@ main {
 }
 
 .error-details {
+  overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;
   background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #fecaca;
   padding: 0.6rem;
   border-radius: 0.35rem;
 }
